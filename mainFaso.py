@@ -19,6 +19,8 @@ liste_identifiants=[1,2,3,4,5,6] ########### ca sera des vrais numero RFID enreg
 #passages=modifPassages() #a faire en relation avec WEB pour sotcker les passages et initialiser 
 passages=[]
 
+validation_de_fin = False
+
 ############################################################################################################################################################################################################################
 
 
@@ -97,7 +99,7 @@ def lectureBoutton(n): #on verifie pendant 2 sec la validation de boutotn
 ##################################### on met les LED en ports D2,D3,D4,D5 ; les bouttons en ports D6(changment de selection),D7(touche validation) ; le buzzer en port D8 ####################################################
 
 eteindreBuzzer(8)
-
+countToExit=0
 while gestionnaire_allume:
         if valRFID!=0 : # valRFID() renvoie un identifiant, si il n'y a pas de badge vaut 0
                 buzzer(8,1,1.5)	# On indique a l'utilisateur qu'il peut intragir avec le gestionnaire
@@ -115,7 +117,7 @@ while gestionnaire_allume:
                 j=2 	
                 nonValide=True
                 
-                while nonValide :	#temps que on a pas valide de tache ou que l'on est pas parti
+                while nonValide and countToExit < 3 :	#temps que on a pas valide de tache ou que l'on est pas parti
 
                         while not(lectureBoutton(7)) and not(lectureBoutton(6)):
                                 for r in range(10):
@@ -139,6 +141,7 @@ while gestionnaire_allume:
                         elif lectureBoutton(7) and not(tableauEntree[j-2]) : #si l'utilisateur veut valider une tache qui n'est pas a faire
                                 buzzer(8,1,2) 	#alors ca bipe 1 fois pendant 2 sec
                                 eteindreBuzzer(8)
+                                countToExit+=1 #si on valide 3 fois une tache non valide on arrete tout sans enregistrer le passage
                                 print("on ne peut pas valider une tache non disponible...")
                                 
                         elif lectureBoutton(6) :
@@ -147,8 +150,10 @@ while gestionnaire_allume:
                                 else :
                                     j+=1
 				print('on selectionne la tache num',j-1)
+				
+                if countToExit == 3 :
+                    validation_de_fin = True
 
-        validation_de_fin = False
         while validation_de_fin == False : # temps que l'utilisateur n'a pas repasse le badge rfid
                 time.sleep(0.1) #pour pas faire planter la raspberry cherie
                 if valRFID!=0 :
@@ -160,7 +165,7 @@ while gestionnaire_allume:
                         heure_fin=time.time()
                         temps_actif=heure_fin - heure_debut
                         for i in liste_identifiants:
-                                print("on est dzans ce for",i)
+                                print("on est dans ce for",i)
                                 if identifiant==i: #on verifie que l'utilisateur est bien enregistre 
                                         print("et dans ce if")
                                         passages.append([identifiant,temps_actif,heure_debut,time.time()]) #on ajoute a l'historique des passages
@@ -176,6 +181,10 @@ while gestionnaire_allume:
                         gestionnaire_allume=False
                         for k in range (2,6):
                                 eteindreLED(k)
+        for k in range (2,6):
+            eteindreLED(k)
+        gestionnaire_allume=False
+        print("Bye bye")
 
 print("THE END")
         
