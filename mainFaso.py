@@ -35,11 +35,11 @@ def buzzer(n,k,x):    #Activation du buzzer connecte en port Dn pour k fois x se
     while count<k :
         try:
             digitalWrite(buzzer,1)
-            print ('start')
+            print ('buzzer on')
             time.sleep(x)
 
             digitalWrite(buzzer,0)
-            print ('stop')
+            print ('buzzer off')
             time.sleep(0.5)
 
         except KeyboardInterrupt:
@@ -49,18 +49,19 @@ def buzzer(n,k,x):    #Activation du buzzer connecte en port Dn pour k fois x se
             print ("Error")
         count+=1
 
-        
+########### on utilise plus clignoter LED #####################"        
 def clignoterLED(n): #on fait clignoter la LED 10 fois a intervalle de 0.5sec
     count=0
     while count<10:
         try:
+            digitalWrite(n,0)     # Send LOW to switch off LED
+            print ("LED OFF!")
+            time.sleep(0.5)
+
             digitalWrite(n,1)     # Send HIGH to switch on LED
             print ("LED ON!")
             time.sleep(0.5)
 
-            digitalWrite(n,0)     # Send LOW to switch off LED
-            print ("LED OFF!")
-            time.sleep(0.5)
         except KeyboardInterrupt:   # Turn LED off before stopping
             digitalWrite(n,0)
             break
@@ -74,7 +75,7 @@ def allumerLED(n): #il faut connecter la LED en Dn (D1/D2/D3/D4...)
     digitalWrite(n,1)     # Send HIGH to switch on LED
 
 def eteindreLED(n): #il faut connecter la LED en Dn (D1/D2/D3/D4...) 
-    time.sleep(0.1)
+    time.sleep(0.05)
     pinMode(n,"OUTPUT")
     digitalWrite(n,0)
     pinMode(8,"OUTPUT") #on eteint le buzzer sinon ca bug 
@@ -132,7 +133,7 @@ while gestionnaire_allume:
                                 buzzer(8,2,1)
                                 eteindreBuzzer(8)
                                 nonValide=False # on valide la tache donc on va sortir de la boucle
-                                print("on vient de valider la tache num",j-1)
+                                print('on vient de valider la tache num',j-1)
 
                                 
                         elif lectureBoutton(7) and not(tableauEntree[j-2]) : #si l'utilisateur veut valider une tache qui n'est pas a faire
@@ -142,34 +143,41 @@ while gestionnaire_allume:
                                 
                         elif lectureBoutton(6) :
                                 if j==5 : 	#Dans le cas ou on est en fin de tableau 
-                                        j=2
+                                    j=2
                                 else :
-                                        j+=1
-				print("on selectionne la tache num",j-1)
+                                    j+=1
+				print('on selectionne la tache num',j-1)
 
         validation_de_fin = False
         while validation_de_fin == False : # temps que l'utilisateur n'a pas repasse le badge rfid
                 time.sleep(0.1) #pour pas faire planter la raspberry cherie
                 if valRFID!=0 :
+                        print("on est dans ce if")
                         validation_de_fin=True
+                        gestionnaire_allume=False #pour le moment on teste
+                        
                         identifiant=valRFID
                         heure_fin=time.time()
                         temps_actif=heure_fin - heure_debut
                         for i in liste_identifiants:
+                                print("on est dzans ce for",i)
                                 if identifiant==i: #on verifie que l'utilisateur est bien enregistre 
+                                        print("et dans ce if")
                                         passages.append([identifiant,temps_actif,heure_debut,time.time()]) #on ajoute a l'historique des passages
-                                        for k in range(2,6): #user est parti donc on eteint toutes les LED
-                                                eteindreLED(k)
-                                                buzzer(8,2,1) 
+                        print("on va quand meme eteindre les led")
+                        for k in range(2,6): #user est parti donc on eteint toutes les LED
+                                eteindreLED(k)
+                        buzzer(8,2,1) 
 
-                elif temps_actif > 7200 : #7200 sec = 2h
+                elif temps_actif > 7200 : #7200 sec = 2h 
                         passages.append([identifiant,0,heure_debut,time.time()])
                         tableauEntree[j-2]=True #l'user a eu un probleme et est parti sans valider: on suppose que la tache n'a pas ete effectuee donc elle est a faire
                         validation_de_fin=True
+                        gestionnaire_allume=False
                         for k in range (2,6):
-                                eteindre(k)
+                                eteindreLED(k)
 
-
+print("THE END")
         
 
 
