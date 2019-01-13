@@ -4,13 +4,14 @@
 
 import time
 from grovepi import *
+from affichage-Tkinter import *
 
 ##########################################################################################################################################################################
 
 # ___ initialisation ___ #
 
 # donnees: Tableau de Booleens de listes de taches a faire(True tache non faite et False tache faite)
-tableauEntree=[True,True,False,True]
+tableauEntree=def_tasks([])
 #tableauEntree=modifTableau()	#modifTableau renvoie un tableau de booleens, qui correspond a la liste des taches a faire (WEB)
 
 
