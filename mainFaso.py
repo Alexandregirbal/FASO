@@ -4,7 +4,8 @@
 
 import time
 from grovepi import *
-from affichage-Tkinter import *
+from tkinter import *
+#from affichage-Tkinter import *
 
 ##########################################################################################################################################################################
 

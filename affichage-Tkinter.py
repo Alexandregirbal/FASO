@@ -3,14 +3,24 @@
 from tkinter import *
 import time
 
-def def_tasks(tasks):
+def interface_gestion(tasks,pas):
 
     if len(tasks)<4:
         tasks=[True,True,True,False]
 
-    fenetre = Tk()
+### --- fentre interactive --- ###
 
-    label_titre = Label(fenetre, text="POTAGERE")
+    fenetre = Tk()
+    fenetre.title("Interface de gestion")
+    fenetre.geometry("300x200")
+
+    menubar = Menu(fenetre)
+    fenetre.config(menu=menubar)
+    menufichier = Menu(menubar,tearoff=0)
+    menubar.add_cascade(label="Passages", command=lambda: liste_passages(pas))
+    menufichier.add_command(label="Consulter les passages")
+
+    label_titre = Label(fenetre, text="POTAGERE",fg="green")
     label_titre.pack()
 
     buttonsb=[]
@@ -43,10 +53,16 @@ def def_tasks(tasks):
     boutton4.pack()
     #boutton5.pack()
 
-    bouton_quitter = Button(fenetre, text="VALIDER", command=fenetre.quit)
-    bouton_quitter.pack()
+    #bouton_quitter = Button(fenetre, text="VALIDER", command=lambda: liste_tasks(tasks))
+    #bouton_quitter.pack()
+
+    #boutton_passages = Button(fenetre, text="AFFICHER LES PASSAGES", command=liste_passages(pas),fg="orange")
+    #boutton_passages.pack()
 
     fenetre.mainloop()
+
+### --- FIN fentre interactive --- ###
+
 
     tasks_button=[]
 
@@ -66,5 +82,49 @@ def def_tasks(tasks):
     return(tasks)
 
 
-print (def_tasks([True,True,False,True]))
+def liste_passages(pas):
+
+    fenetre1 = Tk()
+
+    label_titre = Label(fenetre1, text="POTAGERE",fg="green")
+    label_titre.pack()
+
+    taille = len(pas)
+    tymax=(50+30*taille)
+    can=Canvas(fenetre1,width=600,height=tymax)
+    can.pack()
+    ### -- init -- ###
+    can.create_line(0, 10, 600, 10, fill="red")
+    can.create_line(0, tymax, 600, tymax, fill="red")
+    can.create_line(2, 10, 2, tymax, fill="red")
+    can.create_line(125, 10, 125, tymax, fill="red")
+    can.create_line(275, 10, 275, tymax, fill="red")
+    can.create_line(425, 10, 425, tymax, fill="red")
+    can.create_line(600, 10, 600, tymax, fill="red")
+
+    can.create_text(60, 25, text="IDENTIFIANTS")
+    can.create_text(200, 25, text="TEMPS ACTIF")
+    can.create_text(350, 25, text="HEURE DEBUT")
+    can.create_text(500, 25, text="HEURE FIN")
+
+    ### -- fin init -- ###
+
+    for i in range(taille):
+        can.create_line(0, 10+30*(i+1), 600, 10+30*(i+1), fill="red")
+        id=pas[i][0]
+        tmps_a=pas[i][1]
+        h_dbt=pas[i][2]
+        h_fin=pas[i][3]
+        y=50+30*i
+        can.create_text(20, y, text=id)
+        can.create_text(175, y, text=tmps_a)
+        can.create_text(325, y, text=h_dbt)
+        can.create_text(475, y, text=h_fin)
+
+    fenetre1.mainloop()
+
+    return(pas)
+
+
+res=interface_gestion([True,True,False,True],[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],[17,18,19,20]])
 input()
