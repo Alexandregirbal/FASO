@@ -244,99 +244,99 @@ def liste_passages(pas):
 # il faut mettre les LED en ports D2,D3,D4,D5 ; les bouttons en ports D6(changment de selection) et D7(touche validation) ; le buzzer en port D8 .
 
 
-        eteindreBuzzer(8)
-        countToExit=0
-        while gestionnaire_allume:
-                if valRFID!=0 : # valRFID() renvoie un identifiant, si il n'y a pas de badge vaut 0
-                        buzzer(8,1,1.5)	# On indique a l'utilisateur qu'il peut intragir avec le gestionnaire
-                        eteindreBuzzer(8)
-                        time.sleep(2)
+eteindreBuzzer(8)
+countToExit=0
+while gestionnaire_allume:
+        if valRFID!=0 : # valRFID() renvoie un identifiant, si il n'y a pas de badge vaut 0
+                buzzer(8,1,1.5)	# On indique a l'utilisateur qu'il peut intragir avec le gestionnaire
+                eteindreBuzzer(8)
+                time.sleep(2)
 
-                        for i in range(2,6) :	#on initialise pour voir quelles taches sont a faire
-                                if tableauEntree[i-2]:
-                                        allumerLED(i)
-                                        eteindreBuzzer(8)
-                                        time.sleep(0.02)
-                                        print("on allume la LED en ",i)
+                for i in range(2,6) :	#on initialise pour voir quelles taches sont a faire
+                        if tableauEntree[i-2]:
+                                allumerLED(i)
+                                eteindreBuzzer(8)
+                                time.sleep(0.02)
+                                print("on allume la LED en ",i)
 
-                        # on initialise la boucle:
-                        j=2
-                        nonValide=True
+                # on initialise la boucle:
+                j=2
+                nonValide=True
 
-                        while nonValide and countToExit < 3 :	#temps que on a pas valide de tache ou que l'on est pas parti
+                while nonValide and countToExit < 3 :	#temps que on a pas valide de tache ou que l'on est pas parti
 
-                                while not(lectureBoutton(7,1)) and not(lectureBoutton(6,1)): # si on appuie pas sur un des deux boutons ca clignotte
-                                        digitalWrite(j,0)     # Send LOW to switch off LED
-                                        print ("LED OFF!")
-                                        time.sleep(0.1)
-                                        digitalWrite(j,1)     # Send HIGH to switch on LED
-                                        print ("LED ON!")
-                                        time.sleep(0.1)
-                                        eteindreBuzzer(8)
+                        while not(lectureBoutton(7,1)) and not(lectureBoutton(6,1)): # si on appuie pas sur un des deux boutons ca clignotte
+                                digitalWrite(j,0)     # Send LOW to switch off LED
+                                print ("LED OFF!")
+                                time.sleep(0.1)
+                                digitalWrite(j,1)     # Send HIGH to switch on LED
+                                print ("LED ON!")
+                                time.sleep(0.1)
+                                eteindreBuzzer(8)
 
-                                # un fois qu'on sort de la boucle verifie quel touche est appuyee:
-                                if lectureBoutton(7,1) and tableauEntree[j-2]: 	#si l'utilisateur a appuye sur entrer
-                                        heure_debut=time.time() 	#on stock l'heure de debut
-                                        tableauEntree[j-2]=False 	#modification du tableau d'entree des taches
-                                        buzzer(8,2,1)
-                                        eteindreBuzzer(8)
-                                        nonValide=False # on valide la tache donc on va sortir de la boucle
-                                        print('on vient de valider la tache num',j-1)
-
-
-                                elif lectureBoutton(7,1) and not(tableauEntree[j-2]) : #si l'utilisateur veut valider une tache qui n'est pas a faire
-                                        buzzer(8,1,2) 	#alors ca bipe 1 fois pendant 2 sec
-                                        countToExit+=1 #si on valide 3 fois une tache non valide on arrete tout sans enregistrer le passage
-                                        print("on ne peut pas valider une tache non disponible...")
-
-                                elif lectureBoutton(6,1) :
-                                        if tableauEntree[j-2] == False :
-                                            eteindreLED(j) #dans le cas ou la tache n'etait pas a faire
-                                        if j==5 : 	#Dans le cas ou on est en fin de tableau
-                                            j=2
-                                        else :
-                                            j+=1
-                                        print('on selectionne la tache num',j-1)
-
-                        if countToExit == 3 :
-                            validation_de_fin = True
-
-                while validation_de_fin == False : # temps que l'utilisateur n'a pas repasse le badge rfid
-                        time.sleep(0.1) #pour pas faire planter la raspberry cherie
-                        if valRFID!=0 :
-                                print("Un badge RFID est capte")
-                                validation_de_fin=True
-                                gestionnaire_allume=False #pour le moment on teste
-                                identifiant = valRFID
-                                heure_fin = time.time()
-                                temps_actif = heure_fin - heure_debut
-                                for i in liste_identifiants:
-                                        print("on verifie que le badge est bien enregistre:",i)
-                                        time.sleep(0.5)
-                                        if valRFID == i:
-                                            print("Super il est bien enregistre, on ajoute les infos a la bdd.")
-                                            passages.append([identifiant,temps_actif,heure_debut,time.strftime('%d/%m/%y')]) #on ajoute a l'historique des passages
-                                            #buzzer(8,2,1) # une fois que tout est fini on fait buzzer pour signaler la fin
-
-                        elif temps_actif > 60*60*temps_limite : # temps_limite en heure(s)
-                                passages.append([identifiant,0,heure_debut,time.time()])
-                                tableauEntree[j-2]=True #l'user a eu un probleme et est parti sans valider: on suppose que la tache n'a pas ete effectuee
-                                validation_de_fin=True
-
-                print("On va quand meme eteindre les LED.")
-                for k in range(2,6):
-                        eteindreLED(k)
-
-                eteindreBuzzer(8) # pour eviter les bugs
-                gestionnaire_allume=False
-
-                print("Bye bye")
-                print(passages)
-
-        print("Le gestionaire est eteint.")
+                        # un fois qu'on sort de la boucle verifie quel touche est appuyee:
+                        if lectureBoutton(7,1) and tableauEntree[j-2]: 	#si l'utilisateur a appuye sur entrer
+                                heure_debut=time.time() 	#on stock l'heure de debut
+                                tableauEntree[j-2]=False 	#modification du tableau d'entree des taches
+                                buzzer(8,2,1)
+                                eteindreBuzzer(8)
+                                nonValide=False # on valide la tache donc on va sortir de la boucle
+                                print('on vient de valider la tache num',j-1)
 
 
-if (lectureBoutton(7,6)) and (lectureBoutton(6,6)):
+                        elif lectureBoutton(7,1) and not(tableauEntree[j-2]) : #si l'utilisateur veut valider une tache qui n'est pas a faire
+                                buzzer(8,1,2) 	#alors ca bipe 1 fois pendant 2 sec
+                                countToExit+=1 #si on valide 3 fois une tache non valide on arrete tout sans enregistrer le passage
+                                print("on ne peut pas valider une tache non disponible...")
+
+                        elif lectureBoutton(6,1) :
+                                if tableauEntree[j-2] == False :
+                                    eteindreLED(j) #dans le cas ou la tache n'etait pas a faire
+                                if j==5 : 	#Dans le cas ou on est en fin de tableau
+                                    j=2
+                                else :
+                                    j+=1
+                                print('on selectionne la tache num',j-1)
+
+                if countToExit == 3 :
+                    validation_de_fin = True
+
+        while validation_de_fin == False : # temps que l'utilisateur n'a pas repasse le badge rfid
+                time.sleep(0.1) #pour pas faire planter la raspberry cherie
+                if valRFID!=0 :
+                        print("Un badge RFID est capte")
+                        validation_de_fin=True
+                        gestionnaire_allume=False #pour le moment on teste
+                        identifiant = valRFID
+                        heure_fin = time.time()
+                        temps_actif = heure_fin - heure_debut
+                        for i in liste_identifiants:
+                                print("on verifie que le badge est bien enregistre:",i)
+                                time.sleep(0.5)
+                                if valRFID == i:
+                                    print("Super il est bien enregistre, on ajoute les infos a la bdd.")
+                                    passages.append([identifiant,temps_actif,heure_debut,time.strftime('%d/%m/%y')]) #on ajoute a l'historique des passages
+                                    #buzzer(8,2,1) # une fois que tout est fini on fait buzzer pour signaler la fin
+
+                elif temps_actif > 60*60*temps_limite : # temps_limite en heure(s)
+                        passages.append([identifiant,0,heure_debut,time.strftime('%d/%m/%y')])
+                        tableauEntree[j-2]=True #l'user a eu un probleme et est parti sans valider: on suppose que la tache n'a pas ete effectuee
+                        validation_de_fin=True
+
+        print("On va quand meme eteindre les LED.")
+        for k in range(2,6):
+                eteindreLED(k)
+
+        eteindreBuzzer(8) # pour eviter les bugs
+        gestionnaire_allume=False
+
+        print("Bye bye")
+        print(passages)
+
+print("Le gestionaire est eteint.")
+
+
+if (lectureBoutton(7,3)) and (lectureBoutton(6,3)):
     admin=input("Code admin: ")
     temp_h=time.time()
     out=True
